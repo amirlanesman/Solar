@@ -30,6 +30,7 @@
       type="text/JavaScript"
       src=" https://MomentJS.com/downloads/moment.js"
     ></script>
+    <script src="forecast.js"></script>
   </head>
   <body class="w3-light-grey">
     <!-- Top container -->
@@ -61,10 +62,10 @@
           title="close menu"
           ><i class="fa fa-remove fa-fw"></i>  Close Menu</a
         >
-        <a href="index.html class="w3-bar-item w3-button w3-padding"
+        <a href="index.html" class="w3-bar-item w3-button w3-padding"
           ><i class="fa fa-sun-o fa-fw"></i>  Overview</a
         >
-        <a href="advanced.html class="w3-bar-item w3-button w3-padding w3-blue"
+        <a href="advanced.html" class="w3-bar-item w3-button w3-padding w3-blue"
           ><i class="fa fa-eye fa-fw"></i>  Advanced</a
         >
         <a href="settings.html" class="w3-bar-item w3-button w3-padding"
@@ -92,8 +93,8 @@
       </header>
       <div class="w3-panel">
         <div class="w3-row-padding" style="margin: 0 -16px">
-          <div class="w3-twothird">            
-            <pre id="textresults"></pre>
+          <div class="w3-twothird">
+            <pre id="text_results"></pre>
           </div>
           <div class="w3-third"></div>
         </div>
@@ -114,168 +115,6 @@
     </div>
 
     <script>
-      // Get the Sidebar
-      var mySidebar = document.getElementById("mySidebar");
-
-      // Get the DIV with overlay effect
-      var overlayBg = document.getElementById("myOverlay");
-
-      // Toggle between showing and hiding the sidebar, and add overlay effect
-      function w3_open() {
-        if (mySidebar.style.display === "block") {
-          mySidebar.style.display = "none";
-          overlayBg.style.display = "none";
-        } else {
-          mySidebar.style.display = "block";
-          overlayBg.style.display = "block";
-        }
-      }
-
-      // Close the sidebar with the close button
-      function w3_close() {
-        mySidebar.style.display = "none";
-        overlayBg.style.display = "none";
-      }
-
-
-
-      var lastUpdate;
-
-      const baseUrl = "data.json"; //"https://api.forecast.solar/estimate/{{lat}}/{{lon}}/0/0/0.75";
-
-      async function getLocation() {
-        if (navigator.geolocation) {
-          const coordinates = await getCoordinates();
-          await showForecast(coordinates);
-        } else {
-          x.innerHTML = "Geolocation is not supported by this browser.";
-        }
-      }
-
-      function getCoordinates() {
-        return;
-        return new Promise(function (resolve, reject) {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
-        });
-      }
-
-      async function showForecast(position) {
-        // x.innerHTML = "Latitude: " + position.coords.latitude +
-        // "<br>Longitude: " + position.coords.longitude;
-        const forecast = await getForecast(position);
-
-        const dataset = getDataset(forecast);
-        console.log(dataset);
-        createChart(dataset);
-        createTextResults(forecast);
-      }
-      async function createTextResults(forecast) {
-        console.log(JSON.stringify(forecast, undefined, 2));
-        // textResults.textContent = JSON.stringify(forecast, undefined, 2);
-
-      }
-
-      async function getapi(url) {
-        // Storing response
-        // const response = await fetch(url);
-        // // Storing data in form of JSON
-        // var data = await response.json();
-        // console.log(data);
-        //   if (response) {
-        //     console.log("data here");
-        //   }
-      }
-
-      async function getForecast(position) {
-        const url = baseUrl;
-        // .replaceAll("{{lat}}", position.coords.latitude)
-        // .replaceAll("{{lon}}", position.coords.longitude);
-        console.log(url);
-        try {
-          const response = await fetch(url);
-          // // console.log(response);
-          // // console.log();
-          const result = await response.json();
-          if (result.result) {
-            lastUpdate = moment();
-            localStorage.setItem('lastUpdate', lastUpdate.toString());
-            localStorage.setItem('forecast', JSON.stringify(result));
-            return result.result;
-          }
-        } catch (error) {
-          console.error(error);
-        }
-        console.log('falling back to last response');
-        lastUpdate = moment(localStorage.getItem(lastUpdate) || moment());
-        return JSON.parse(localStorage.getItem('forecast')).result;
-      }
-
-      function createChart(dataset) {
-        const config = {
-          type: "line",
-          data: {
-            // labels: ['Jan', 'Feb'],
-            datasets: [
-              {
-                label: "Watt Hours",
-                data: dataset,
-                parsing: {
-                  yAxisKey: "watt_hours",
-                },
-                borderColor: "#0fb4d4",
-                // pointRadius: "10",
-                // pointBackgroundColor: "#945200",
-                // pointBorderColor: "#ff9300",
-                pointHoverBackgroundColor: "#ff9300",
-                pointHoverBorderColor: "#945200",
-              },
-              {
-                label: "Watts",
-                data: dataset,
-                parsing: {
-                  yAxisKey: "watts",
-                },
-                borderColor: "#ffa3e6",
-                // pointRadius: "10",
-                // pointBackgroundColor: "#945200",
-                // pointBorderColor: "#ff9300",
-                pointHoverBackgroundColor: "#ff9300",
-                pointHoverBorderColor: "#945200",
-              },
-            ],
-          },
-          options: {
-            interaction: {
-              mode: "nearest",
-              axis: "x",
-              intersect: false,
-              // Overrides the global setting
-              // mode: "index",
-            },
-            scales: {
-              x: {
-                ticks: {
-                  // Include a dollar sign in the ticks
-                  callback: function (val, index, ticks) {
-                    return moment(this.getLabelForValue(val)).format(
-                      "ddd DD/MM HH:mm"
-                    );
-                  },
-                },
-              },
-            },
-          },
-        };
-        const myChart = new Chart(document.getElementById("myChart"), config);
-      }
-
-      function getDataset(data) {
-        return Object.keys(data.watts).map((ts) => ({
-          x: moment(ts).format("LLLL"),
-          watts: data.watts[ts],
-          watt_hours: data.watt_hours[ts],
-        }));
-      }
       getLocation();
     </script>
   </body>
