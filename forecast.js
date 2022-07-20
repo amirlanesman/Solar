@@ -20,7 +20,8 @@ var mySidebar = document.getElementById("mySidebar");
 var overlayBg = document.getElementById("myOverlay");
 var chart;
 var lastUpdate;
-const baseUrl = "data.json"; //"https://api.forecast.solar/estimate/{{lat}}/{{lon}}/{{tilt}}/{{azimuth}}/{{power}}";
+// const baseUrl = "data.json"; //"https://api.forecast.solar/estimate/{{lat}}/{{lon}}/{{tilt}}/{{azimuth}}/{{power}}";
+const baseUrl = "https://api.forecast.solar/estimate/{{lat}}/{{lon}}/{{tilt}}/{{azimuth}}/{{power}}";
 
 
 // Toggle between showing and hiding the sidebar, and add overlay effect
@@ -55,6 +56,11 @@ async function getLocation() {
   if(spinner) {
     spinner.classList.add('fa-spin');
   }
+  const stored = localStorage.getItem('forecast');
+  if (stored) {
+    console.log(stored);
+    setForecast(JSON.parse(stored).result);
+  }
   if (navigator.geolocation) {
     const coordinates = await getCoordinates();
     await showForecast(coordinates);
@@ -67,7 +73,7 @@ async function getLocation() {
 }
 
 function getCoordinates() {
-  return;
+  // return;
   return new Promise(function (resolve, reject) {
     navigator.geolocation.getCurrentPosition(resolve, reject);
   });
@@ -120,15 +126,16 @@ async function getForecast(position) {
   // solarWattage
   // solarPanelsTilt
   // solarPanelsAzimuth
-  // const lat = settings.specificLocation ? settings.lat: position.coords.latitude;
-  // const lon = settings.specificLocation ? settings.lon : position.coords.longitude;
   //"https://api.forecast.solar/estimate/{{lat}}/{{lon}}/{{tilt}}/{{azimuth}}/{{power}}";
-  const url = baseUrl;
-  // .replaceAll("{{lat}}", lat)
-  // .replaceAll("{{lon}}", lon);
-  // .replaceAll("{{tilt}}", settings.solarPanelsTilt);
-  // .replaceAll("{{azimuth}}", settings.solarPanelsAzimuth);
-  // .replaceAll("{{power}}", settings.solarWattage / 1000);
+  // console.log(position);
+  const lat = settings.specificLocation ? settings.lat: position.coords.latitude;
+  const lon = settings.specificLocation ? settings.lon : position.coords.longitude;
+  const url = baseUrl
+    .replaceAll("{{lat}}", lat)
+    .replaceAll("{{lon}}", lon)
+    .replaceAll("{{tilt}}", settings.solarPanelsTilt)
+    .replaceAll("{{azimuth}}", settings.solarPanelsAzimuth)
+    .replaceAll("{{power}}", settings.solarWattage / 1000);
   // console.log(url);
   try {
     const response = await fetch(url);
